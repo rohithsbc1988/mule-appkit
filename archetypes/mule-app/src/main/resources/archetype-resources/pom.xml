@@ -8,7 +8,7 @@
 	<artifactId>${artifactId}</artifactId>
 	<packaging>mule</packaging>
 	<name>Mule ${artifactId} Application</name>
-	<version>${version}</version>
+	<version>@project.version@</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -45,8 +45,8 @@
 							<pluginExecutions>
 								<pluginExecution>
 									<pluginExecutionFilter>
-										<groupId>org.mule.tools</groupId>
-										<artifactId>maven-mule-plugin</artifactId>
+										<groupId>org.mule.tools.appkit</groupId>
+										<artifactId>mule-appkit-maven-plugin</artifactId>
 										<versionRange>[1.6,)</versionRange>
 										<goals>
 											<goal>attach-test-resources</goal>
@@ -65,8 +65,8 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>org.mule.tools</groupId>
-				<artifactId>maven-mule-plugin</artifactId>
+				<groupId>org.mule.tools.appkit</groupId>
+				<artifactId>mule-appkit-maven-plugin</artifactId>
 				<version>1.7</version>
 				<extensions>true</extensions>
 				<configuration>
@@ -85,7 +85,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2.1</version>
+				<version>@mule.version@</version>
 				<configuration>
 					<descriptorRefs>
 						<descriptorRef>project</descriptorRef>
