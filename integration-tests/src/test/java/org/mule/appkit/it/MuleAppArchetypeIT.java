@@ -66,7 +66,5 @@ public class MuleAppArchetypeIT {
         verifier.executeGoal("package");
 
         verifier.verifyErrorFreeLog();
-
-        verifier.verifyTextInLog("generate-sources");
     }
 }
