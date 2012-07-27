@@ -15,5 +15,6 @@
 
     <modules>
         <module>maven</module>
+        <module>cargo</module>
     </modules>
 </project>

@@ -30,6 +30,7 @@
 
     <properties>
         <mule.version>3.3.0</mule.version>
+        <cargo.version>1.2.3</cargo.version>
         <jdk.version>1.6</jdk.version>
     </properties>
 
