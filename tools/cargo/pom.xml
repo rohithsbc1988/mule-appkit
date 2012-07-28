@@ -25,14 +25,16 @@
             <version>${cargo.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.mule</groupId>
-            <artifactId>mule-core</artifactId>
+            <groupId>org.mule.distributions</groupId>
+            <artifactId>mule-standalone</artifactId>
             <version>${mule.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mule.modules</groupId>
-            <artifactId>mule-module-launcher</artifactId>
-            <version>${mule.version}</version>
+            <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mule.examples</groupId>
+                    <artifactId>mule-examples-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

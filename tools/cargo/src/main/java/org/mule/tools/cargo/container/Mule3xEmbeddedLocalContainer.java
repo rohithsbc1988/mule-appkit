@@ -1,22 +1,27 @@
 package org.mule.tools.cargo.container;
 
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.List;
-
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.PropertyConfigurator;
 import org.codehaus.cargo.container.ContainerCapability;
+import org.codehaus.cargo.container.ContainerException;
 import org.codehaus.cargo.container.configuration.LocalConfiguration;
 import org.codehaus.cargo.container.deployable.Deployable;
 import org.codehaus.cargo.container.spi.AbstractEmbeddedLocalContainer;
 import org.mule.MuleServer;
 import org.mule.tools.cargo.deployable.MuleApplicationDeployable;
 import org.mule.tools.cargo.deployable.ZipApplicationDeployable;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.security.Permission;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Start an embedded {@link MuleServer} using maven dependencies.
@@ -27,7 +32,7 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
 
     public static final String ID = "mule3x";
     public static final String NAME = "Mule 3.x Embedded";
-    private MuleServer server;
+    private Object server;
     private static String LOG4J_PROPERTIES = "log4j.properties";
 
     public Mule3xEmbeddedLocalContainer(final LocalConfiguration configuration) {
@@ -49,14 +54,11 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         return new MuleContainerCapability();
     }
 
-    protected final MuleServer getServer() {
+    protected final Object getServer() throws Exception {
+        if (this.server == null) {
+            createServerObject();
+        }
         return this.server;
-    }
-
-    protected final void startServer() {
-        final MuleServer muleServer = new MuleServer();
-        muleServer.start(false, false);
-        this.server = muleServer;
     }
 
     /**
@@ -65,10 +67,10 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
     protected final Deployable getDeployable() {
         final List<Deployable> deployables = getConfiguration().getDeployables();
         if (deployables.isEmpty()) {
-            throw new IllegalArgumentException("No "+Deployable.class.getSimpleName()+" defined");
+            throw new IllegalArgumentException("No " + Deployable.class.getSimpleName() + " defined");
         }
         if (deployables.size() != 1) {
-            throw new IllegalArgumentException("Only suppports a single "+Deployable.class.getSimpleName());
+            throw new IllegalArgumentException("Only supports a single " + Deployable.class.getSimpleName());
         }
         return deployables.get(0);
     }
@@ -78,7 +80,7 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         if (log4jProperties == null) {
             final Logger root = Logger.getRootLogger();
             root.setLevel(Level.INFO);
-            root.addAppender(new ConsoleAppender(new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN)));
+            root.addAppender(new ConsoleAppender(new PatternLayout("[%p] %m%n")));
         } else {
             PropertyConfigurator.configure(log4jProperties);
         }
@@ -92,18 +94,37 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         }
 
         configureLog4j();
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            final URLClassLoader applicationClassLoader = URLClassLoader.newInstance(new URL[]{
-                new File(deployable.getFile()).toURI().toURL(),
-                //TODO Add support for embedded lib directory
-                new URL("jar:file:"+deployable.getFile()+"!/classes/")
-            }, getClassLoader());
-            Thread.currentThread().setContextClassLoader(applicationClassLoader);
 
-            startServer();
+        System.setSecurityManager(new NoExitSecurityManager());
+
+        String fakeMuleHome = createFakeMuleHomeDirectory().getAbsolutePath();
+        getLogger().debug("Fake Mule Home: " + fakeMuleHome, getClass().getName());
+
+        System.setProperty("mule.simpleLog", "true");
+        System.setProperty("mule.home", fakeMuleHome);
+
+        // start
+        getServer().getClass().getMethod("start", new Class[]{boolean.class}).invoke(getServer(), false);
+
+        // get deployment service
+        Field deploymentServiceField = getServer().getClass().getDeclaredField("deploymentService");
+        deploymentServiceField.setAccessible(true);
+        Object deploymentService = deploymentServiceField.get(getServer());
+
+        // get lock
+        Field lockField = deploymentService.getClass().getDeclaredField("lock");
+        lockField.setAccessible(true);
+        Object lock = lockField.get(deploymentService);
+
+        Method tryLock = lock.getClass().getMethod("tryLock", new Class[]{long.class, TimeUnit.class});
+
+
+        try {
+            tryLock.invoke(lock, 60L, TimeUnit.SECONDS);
+
+            deploymentService.getClass().getMethod("deploy", new Class[]{URL.class}).invoke(deploymentService, new File(deployable.getFile()).toURI().toURL());
         } finally {
-            Thread.currentThread().setContextClassLoader(classLoader);
+            lock.getClass().getMethod("unlock").invoke(lock);
         }
     }
 
@@ -113,8 +134,78 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
 
     @Override
     protected void doStop() throws Exception {
-        //Don't call shutdown to prevent call to exit.
-        getServer().getMuleContext().dispose();
+        try
+        {
+            getServer().getClass().getMethod("shutdown").invoke(getServer());
+        } catch( Exception e ) {
+            // most likely NoExitException
+        }
+        System.setSecurityManager(null);
     }
 
+    /**
+     * Create a Mule Server Object.
+     *
+     * @throws Exception in case of error
+     */
+    protected synchronized void createServerObject() throws Exception {
+        if (this.server == null) {
+            try {
+                this.server = getClassLoader().loadClass("org.mule.module.launcher.MuleContainer").newInstance();
+            } catch (Exception e) {
+                throw new ContainerException("Failed to create Mule container", e);
+            }
+        }
+    }
+
+    public File createFakeMuleHomeDirectory()
+            throws IOException {
+        File fakeMuleHome = File.createTempFile("fakeMuleHome", Long.toString(System.nanoTime()));
+        File fakeAppsDir = new File(fakeMuleHome, "apps");
+        File fakeLibDir = new File(fakeMuleHome, "lib/shared/default");
+
+        if (!(fakeMuleHome.delete()) || !(fakeMuleHome.mkdir())) {
+            throw new IOException("Could not create fake mule home: " + fakeMuleHome.getAbsolutePath());
+        }
+
+        if (!(fakeAppsDir.mkdir())) {
+            throw new IOException("Could not create fake apps home: " + fakeAppsDir.getAbsolutePath());
+        }
+
+        if (!(fakeLibDir.mkdirs())) {
+            throw new IOException("Could not create fake lib dir: " + fakeLibDir.getAbsolutePath());
+        }
+
+        return fakeMuleHome;
+    }
+
+    protected static class ExitException extends SecurityException
+    {
+        public final int status;
+        public ExitException(int status)
+        {
+            super("There is no escape!");
+            this.status = status;
+        }
+    }
+
+    private static class NoExitSecurityManager extends SecurityManager
+    {
+        @Override
+        public void checkPermission(Permission perm)
+        {
+            // allow anything.
+        }
+        @Override
+        public void checkPermission(Permission perm, Object context)
+        {
+            // allow anything.
+        }
+        @Override
+        public void checkExit(int status)
+        {
+            super.checkExit(status);
+            throw new ExitException(status);
+        }
+    }
 }
