@@ -112,7 +112,7 @@ public abstract class AbstractMavenIT {
     {
         String appArchivePath = String.format("target/integration-tests/%1s/target/%2s-1.0-SNAPSHOT.zip",
                 getArtifactId(), getArtifactId());
-        File appArchiveFile = new File(appArchivePath);
+        File appArchiveFile = (new File(appArchivePath)).getAbsoluteFile();
         assertFileExists(appArchiveFile);
 
         return appArchiveFile;
