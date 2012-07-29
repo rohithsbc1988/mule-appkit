@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 public abstract class AbstractMavenIT {
 
@@ -127,4 +129,35 @@ public abstract class AbstractMavenIT {
     {
         assertFalse(file.getAbsolutePath() + " must not exist", file.exists());
     }
+
+    protected void assertZipDoesNotContain(File file, String... filenames) throws IOException
+    {
+        ZipFile zipFile = null;
+        try
+        {
+            zipFile = new ZipFile(file);
+
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements())
+            {
+                ZipEntry entry = entries.nextElement();
+
+                for (String name :filenames)
+                {
+                    if (entry.getName().equals(name))
+                    {
+                        fail(file.getAbsolutePath() + " contains invalid entry " + name);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            if (zipFile != null)
+            {
+                zipFile.close();
+            }
+        }
+    }
+
 }
