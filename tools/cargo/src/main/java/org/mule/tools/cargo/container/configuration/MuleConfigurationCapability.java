@@ -11,6 +11,7 @@ public class MuleConfigurationCapability extends AbstractConfigurationCapability
 
     public MuleConfigurationCapability() {
         propertyMap.put(MulePropetySet.SPRING_PROFILE_ACTIVE, Boolean.TRUE);
+        propertyMap.put(MulePropetySet.HTTP_PORT, Boolean.TRUE);
     }
 
     @Override

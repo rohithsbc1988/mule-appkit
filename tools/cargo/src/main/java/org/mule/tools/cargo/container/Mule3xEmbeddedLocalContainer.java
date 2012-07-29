@@ -109,6 +109,10 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
             System.setProperty("spring.profiles.active", getConfiguration().getProperties().get(MulePropetySet.SPRING_PROFILE_ACTIVE));
         }
 
+        if( getConfiguration().getProperties().containsKey(MulePropetySet.HTTP_PORT) ) {
+            System.setProperty("http.port", getConfiguration().getProperties().get(MulePropetySet.HTTP_PORT));
+        }
+
         // configure Log4J
         configureLog4j();
 

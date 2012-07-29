@@ -9,4 +9,9 @@ public interface MulePropetySet {
      */
     String SPRING_PROFILE_ACTIVE = "cargo.mule.spring.profile";
 
+    /**
+     * The default HTTP port
+     */
+    String HTTP_PORT = "cargo.mule.http.port";
+
 }
