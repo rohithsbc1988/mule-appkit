@@ -11,12 +11,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 public abstract class AbstractMavenIT {
 
@@ -29,6 +33,8 @@ public abstract class AbstractMavenIT {
     protected abstract String getGroupId();
 
     protected abstract File getRoot();
+
+    protected abstract void verify() throws Exception;
 
     @Before
     public void setUp() throws VerificationException, IOException {
@@ -56,6 +62,8 @@ public abstract class AbstractMavenIT {
             verifier.executeGoal("package", envVars);
 
             verifier.verifyErrorFreeLog();
+
+            verify();
         } catch (IOException ioe) {
             throw new VerificationException(ioe);
         }
@@ -73,7 +81,7 @@ public abstract class AbstractMavenIT {
         }
     }
 
-    private String contentsOfMuleConfigFromZipFile(File muleAppZipFile) throws Exception
+    protected String contentsOfMuleConfigFromZipFile(File muleAppZipFile) throws Exception
     {
         ZipFile zipFile = null;
         InputStream muleConfigStream = null;
@@ -100,4 +108,23 @@ public abstract class AbstractMavenIT {
         }
     }
 
+    protected File zipFileFromBuildingProject() throws Exception
+    {
+        String appArchivePath = String.format("target/integration-tests/%1s/target/%2s-1.0-SNAPSHOT.zip",
+                getArtifactId(), getArtifactId());
+        File appArchiveFile = new File(appArchivePath);
+        assertFileExists(appArchiveFile);
+
+        return appArchiveFile;
+    }
+
+    protected void assertFileExists(File file)
+    {
+        assertTrue(file.getAbsolutePath() + " must exist", file.exists());
+    }
+
+    protected void assertFileDoesNotExist(File file)
+    {
+        assertFalse(file.getAbsolutePath() + " must not exist", file.exists());
+    }
 }

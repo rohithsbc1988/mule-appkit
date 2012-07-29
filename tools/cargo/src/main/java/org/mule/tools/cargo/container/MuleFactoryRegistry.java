@@ -11,10 +11,10 @@ import org.codehaus.cargo.generic.configuration.ConfigurationFactory;
 import org.codehaus.cargo.generic.deployable.DeployableFactory;
 import org.codehaus.cargo.generic.deployer.DeployerFactory;
 import org.codehaus.cargo.generic.packager.PackagerFactory;
+import org.mule.tools.cargo.container.configuration.Mule3xEmbeddedConfiguration;
 import org.mule.tools.cargo.container.configuration.Mule3xLocalConfiguration;
 import org.mule.tools.cargo.container.configuration.MuleConfigurationCapability;
 import org.mule.tools.cargo.deployable.MuleApplicationDeployable;
-import org.mule.tools.cargo.deployable.ZipApplicationDeployable;
 import org.mule.tools.cargo.deployer.FileDeployer;
 
 /**
@@ -31,7 +31,6 @@ public class MuleFactoryRegistry extends AbstractFactoryRegistry
     @Override
     protected void register(final DeployableFactory factory) {
         factory.registerDeployable(Mule3xEmbeddedLocalContainer.ID, MuleApplicationDeployable.TYPE, MuleApplicationDeployable.class);
-        factory.registerDeployable(Mule3xEmbeddedLocalContainer.ID, ZipApplicationDeployable.TYPE, ZipApplicationDeployable.class);
     }
 
     /**
@@ -52,7 +51,7 @@ public class MuleFactoryRegistry extends AbstractFactoryRegistry
      */
     @Override
     protected void register(final ConfigurationFactory factory) {
-        factory.registerConfiguration(Mule3xEmbeddedLocalContainer.ID, ContainerType.EMBEDDED, ConfigurationType.STANDALONE, Mule3xLocalConfiguration.class);
+        factory.registerConfiguration(Mule3xEmbeddedLocalContainer.ID, ContainerType.EMBEDDED, ConfigurationType.STANDALONE, Mule3xEmbeddedConfiguration.class);
         factory.registerConfiguration(Mule3xInstalledLocalContainer.ID, ContainerType.INSTALLED, ConfigurationType.STANDALONE, Mule3xLocalConfiguration.class);
     }
 

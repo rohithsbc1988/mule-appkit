@@ -4,18 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.tools.ant.util.FileUtils;
 import org.codehaus.cargo.container.InstalledLocalContainer;
-import org.mule.tools.cargo.deployable.MuleApplicationDeployable;
-
 import org.codehaus.cargo.container.deployable.Deployable;
 import org.codehaus.cargo.container.deployable.DeployableException;
 import org.codehaus.cargo.container.spi.deployer.AbstractInstalledLocalDeployer;
 import org.mule.module.launcher.DeploymentService;
 import org.mule.tools.cargo.deployable.AbstractMuleDeployable;
-import org.mule.tools.cargo.deployable.ZipApplicationDeployable;
+import org.mule.tools.cargo.deployable.MuleApplicationDeployable;
 
-/**
- * Deploy {@link org.mule.tools.cargo.deployable.MuleApplicationDeployable} to a {@link Mule3xInstalledLocalContainer} by copying {@link org.mule.tools.cargo.deployable.MuleApplicationDeployable#getFile()} to {@link Mule3xInstalledLocalContainer#getHome()}/apps.
- */
 public class FileDeployer extends AbstractInstalledLocalDeployer {
 
     private static final long SLEEP_INTERVAL = 500L;
@@ -30,12 +25,8 @@ public class FileDeployer extends AbstractInstalledLocalDeployer {
         super(container);
     }
 
-    /**
-     * @param deployable
-     * @throws DeployableException if provided {@link Deployable} is a {@link org.mule.tools.cargo.deployable.MuleApplicationDeployable}
-     */
     protected final void ensureMuleApplication(final Deployable deployable) {
-        if (!(deployable instanceof MuleApplicationDeployable || deployable instanceof ZipApplicationDeployable)) {
+        if (!(deployable instanceof MuleApplicationDeployable)) {
             throw new DeployableException("Deployable type <" + deployable.getType() + "> is not supported!");
         }
     }

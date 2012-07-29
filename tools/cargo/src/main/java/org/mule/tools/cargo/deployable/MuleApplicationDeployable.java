@@ -7,10 +7,10 @@ import org.codehaus.cargo.container.deployable.DeployableType;
  */
 public class MuleApplicationDeployable extends AbstractMuleDeployable  {
 
-    public static final DeployableType TYPE = DeployableType.toType("mule");
+    public static final DeployableType TYPE = DeployableType.toType("zip");
 
     public MuleApplicationDeployable(final String file) {
-        super(file.substring(0, file.length()-5)+".zip");
+        super(file);
     }
 
     @Override

@@ -17,7 +17,7 @@ import org.mule.module.reboot.MuleContainerBootstrap;
 import org.mule.module.reboot.MuleContainerSystemClassLoader;
 
 /**
- * Start an embedded {@link MuleServer} using maven dependencies.
+ * Start an embedded {@link MuleContainer} using maven dependencies.
  * <br />
  * Configured {@link MuleApplicationDeployable} is deployed on startup.
  */
