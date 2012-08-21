@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Start an embedded {@link MuleServer} using maven dependencies.
@@ -42,6 +43,7 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
     private Object server;
     private String muleHome;
     private static String LOG4J_PROPERTIES = "log4j.properties";
+    private AtomicBoolean started = new AtomicBoolean(false);
 
     public Mule3xEmbeddedLocalContainer(final LocalConfiguration configuration) {
         super(configuration);
@@ -62,7 +64,7 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         return new MuleContainerCapability();
     }
 
-    protected final Object getServer() throws Exception {
+    public final Object getServer() throws Exception {
         if (this.server == null) {
             createServerObject();
         }
@@ -96,15 +98,6 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
 
     @Override
     protected void doStart() throws Exception {
-        final Deployable deployable = getDeployable();
-        if (!(deployable instanceof MuleApplicationDeployable)) {
-            throw new IllegalArgumentException("Deployable type <" + deployable.getType() + "> is not supported!");
-        }
-
-        // application name
-        final String applicationName = ((AbstractMuleDeployable)deployable).getApplicationName();
-        final CauseHolder applicationFailCause = new CauseHolder();
-
         if( getConfiguration().getProperties().containsKey(MulePropetySet.SPRING_PROFILE_ACTIVE) ) {
             System.setProperty("spring.profiles.active", getConfiguration().getProperties().get(MulePropetySet.SPRING_PROFILE_ACTIVE));
         }
@@ -122,70 +115,21 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         // create a fake Mule home
         setMuleHome();
 
-        // copy deployable
-        File targetCopy = new File(muleHome, FilenameUtils.getName(deployable.getFile()));
-        FileUtils.getFileUtils().copyFile(new File(deployable.getFile()), targetCopy);
-
         // enable simple logging
         System.setProperty("mule.simpleLog", "true");
 
         // start
         startContainer();
 
-        // get deployment service
-        Object deploymentService = getDeploymentService();
+        started.set(true);
+    }
 
-        // get lock
-        Object lock = getDeploymentLock(deploymentService);
+    public String getMuleHome() {
+        return muleHome;
+    }
 
-        // get composite deployment listener
-        Object compositeDeploymentListener = getCompositeDeploymentListener(deploymentService);
-        compositeDeploymentListener.getClass()
-                .getMethod("addDeploymentListener", new Class[]{DeploymentListener.class})
-                .invoke(compositeDeploymentListener, new DeploymentListener() {
-                    @Override
-                    public void onDeploymentStart(String appName) {
-                    }
-
-                    @Override
-                    public void onDeploymentSuccess(String appName) {
-                    }
-
-                    @Override
-                    public void onDeploymentFailure(String appName, Throwable cause) {
-                        if( appName.equals(applicationName) ) {
-                            applicationFailCause.setCause(cause);
-                        }
-                    }
-
-                    @Override
-                    public void onUndeploymentStart(String appName) {
-                    }
-
-                    @Override
-                    public void onUndeploymentSuccess(String appName) {
-                    }
-
-                    @Override
-                    public void onUndeploymentFailure(String appName, Throwable cause) {
-                    }
-                });
-
-        Method tryLock = lock.getClass().getMethod("tryLock", new Class[]{long.class, TimeUnit.class});
-
-        try {
-            tryLock.invoke(lock, 60L, TimeUnit.SECONDS);
-
-            deploymentService.getClass().getMethod("deploy", new Class[]{URL.class}).invoke(deploymentService, targetCopy.toURI().toURL());
-        } catch( Exception nee ) {
-            doStop();
-
-            if( applicationFailCause.getCause() != null && applicationFailCause.getCause() instanceof Exception ) {
-                throw (Exception)applicationFailCause.getCause();
-            }
-        } finally {
-            lock.getClass().getMethod("unlock").invoke(lock);
-        }
+    public boolean hasBeenStarted() {
+        return started.get();
     }
 
     private void setMuleHome() throws IOException {
@@ -198,47 +142,6 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
 
     private void setNoExitSecurityManager() {
         System.setSecurityManager(new NoExitSecurityManager());
-    }
-
-    private Object getDeploymentStatusTracker(Object deploymentService) throws NoSuchFieldException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        Object deploymentListener = getCompositeDeploymentListener(deploymentService);
-
-        // get list of deployment listeners
-        Field deploymentListenersField = deploymentListener.getClass().getDeclaredField("deploymentListeners");
-        deploymentListenersField.setAccessible(true);
-        Object deploymentListeners = deploymentListenersField.get(deploymentListener);
-
-        // get size of deployment listeners
-        int size = (Integer)deploymentListeners.getClass().getMethod("size").invoke(deploymentListeners);
-
-        // for one by one until we find the one we want
-        for( int i = 0; i < size; i++ ) {
-            Object innerDeploymentListener = deploymentListeners.getClass().getMethod("get", new Class[]{ int.class}).invoke(deploymentListeners, i);
-            if( innerDeploymentListener.getClass().getName().equals("org.mule.module.launcher.DeploymentStatusTracker")) {
-                return innerDeploymentListener;
-            }
-        }
-
-        return null;
-    }
-
-    private Object getCompositeDeploymentListener(Object deploymentService) throws NoSuchFieldException, IllegalAccessException {
-        // get deploymentlistener
-        Field deploymentListenerField = deploymentService.getClass().getDeclaredField("deploymentListener");
-        deploymentListenerField.setAccessible(true);
-        return deploymentListenerField.get(deploymentService);
-    }
-
-    private Object getDeploymentLock(Object deploymentService) throws NoSuchFieldException, IllegalAccessException {
-        Field lockField = deploymentService.getClass().getDeclaredField("lock");
-        lockField.setAccessible(true);
-        return lockField.get(deploymentService);
-    }
-
-    private Object getDeploymentService() throws Exception {
-        Field deploymentServiceField = getServer().getClass().getDeclaredField("deploymentService");
-        deploymentServiceField.setAccessible(true);
-        return deploymentServiceField.get(getServer());
     }
 
     private void startContainer() throws Exception {
@@ -254,12 +157,15 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         try
         {
             getServer().getClass().getMethod("shutdown").invoke(getServer());
+
+            System.setSecurityManager(null);
+
+            new File(muleHome).deleteOnExit();
         } catch( Exception e ) {
             // most likely ExitException
+        } finally {
+            started.set(false);
         }
-        System.setSecurityManager(null);
-
-        new File(muleHome).deleteOnExit();
     }
 
     /**
@@ -325,55 +231,6 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         {
             super.checkExit(status);
             throw new ExitException(status);
-        }
-    }
-
-    private static class CauseHolder {
-        private Throwable cause;
-
-        public Throwable getCause() {
-            return cause;
-        }
-
-        public void setCause(Throwable cause) {
-            this.cause = cause;
-        }
-    }
-
-    protected static void setEnv(Map<String, String> newenv)
-    {
-        try
-        {
-            Class<?> processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
-            Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
-            theEnvironmentField.setAccessible(true);
-            Map<String, String> env = (Map<String, String>) theEnvironmentField.get(null);
-            env.putAll(newenv);
-            Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
-            theCaseInsensitiveEnvironmentField.setAccessible(true);
-            Map<String, String> cienv = (Map<String, String>)     theCaseInsensitiveEnvironmentField.get(null);
-            cienv.putAll(newenv);
-        }
-        catch (NoSuchFieldException e)
-        {
-            try {
-                Class[] classes = Collections.class.getDeclaredClasses();
-                Map<String, String> env = System.getenv();
-                for(Class cl : classes) {
-                    if("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
-                        Field field = cl.getDeclaredField("m");
-                        field.setAccessible(true);
-                        Object obj = field.get(env);
-                        Map<String, String> map = (Map<String, String>) obj;
-                        map.clear();
-                        map.putAll(newenv);
-                    }
-                }
-            } catch (Exception e2) {
-                e2.printStackTrace();
-            }
-        } catch (Exception e1) {
-            e1.printStackTrace();
         }
     }
 }

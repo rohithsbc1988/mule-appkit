@@ -15,6 +15,7 @@ import org.mule.tools.cargo.container.configuration.Mule3xEmbeddedConfiguration;
 import org.mule.tools.cargo.container.configuration.Mule3xLocalConfiguration;
 import org.mule.tools.cargo.container.configuration.MuleConfigurationCapability;
 import org.mule.tools.cargo.deployable.MuleApplicationDeployable;
+import org.mule.tools.cargo.deployer.EmbeddedDeployer;
 import org.mule.tools.cargo.deployer.FileDeployer;
 
 /**
@@ -63,6 +64,7 @@ public class MuleFactoryRegistry extends AbstractFactoryRegistry
     @Override
     protected void register(final DeployerFactory factory) {
         factory.registerDeployer(Mule3xInstalledLocalContainer.ID, DeployerType.INSTALLED, FileDeployer.class);
+        factory.registerDeployer(Mule3xInstalledLocalContainer.ID, DeployerType.EMBEDDED, EmbeddedDeployer.class);
     }
 
     /**
