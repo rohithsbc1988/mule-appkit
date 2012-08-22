@@ -44,6 +44,7 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
     private String muleHome;
     private static String LOG4J_PROPERTIES = "log4j.properties";
     private AtomicBoolean started = new AtomicBoolean(false);
+    private SecurityManager oldSecurityManager;
 
     public Mule3xEmbeddedLocalContainer(final LocalConfiguration configuration) {
         super(configuration);
@@ -121,6 +122,8 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         // start
         startContainer();
 
+        restoreSecurityManager();
+
         started.set(true);
     }
 
@@ -141,6 +144,7 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
     }
 
     private void setNoExitSecurityManager() {
+        oldSecurityManager = System.getSecurityManager();
         System.setSecurityManager(new NoExitSecurityManager());
     }
 
@@ -152,13 +156,20 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
     protected final void waitForCompletion(final boolean waitForStarting) throws InterruptedException {
     }
 
+    private void restoreSecurityManager() {
+        System.setSecurityManager(oldSecurityManager);
+    }
+
     @Override
     protected void doStop() throws Exception {
         try
         {
+            // avoid Mule calling System.exit(0)
+            setNoExitSecurityManager();
+
             getServer().getClass().getMethod("shutdown").invoke(getServer());
 
-            System.setSecurityManager(null);
+            restoreSecurityManager();
 
             new File(muleHome).deleteOnExit();
         } catch( Exception e ) {
