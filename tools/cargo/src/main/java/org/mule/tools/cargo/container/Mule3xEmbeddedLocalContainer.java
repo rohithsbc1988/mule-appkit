@@ -1,34 +1,22 @@
 package org.mule.tools.cargo.container;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.PropertyConfigurator;
-import org.apache.tools.ant.util.FileUtils;
 import org.codehaus.cargo.container.ContainerCapability;
 import org.codehaus.cargo.container.ContainerException;
 import org.codehaus.cargo.container.configuration.LocalConfiguration;
 import org.codehaus.cargo.container.deployable.Deployable;
 import org.codehaus.cargo.container.spi.AbstractEmbeddedLocalContainer;
 import org.mule.MuleServer;
-import org.mule.module.launcher.DeploymentListener;
-import org.mule.tools.cargo.deployable.AbstractMuleDeployable;
 import org.mule.tools.cargo.deployable.MuleApplicationDeployable;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
 import java.security.Permission;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -44,7 +32,6 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
     private String muleHome;
     private static String LOG4J_PROPERTIES = "log4j.properties";
     private AtomicBoolean started = new AtomicBoolean(false);
-    private SecurityManager oldSecurityManager;
 
     public Mule3xEmbeddedLocalContainer(final LocalConfiguration configuration) {
         super(configuration);
@@ -99,19 +86,16 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
 
     @Override
     protected void doStart() throws Exception {
-        if( getConfiguration().getProperties().containsKey(MulePropetySet.SPRING_PROFILE_ACTIVE) ) {
+        if (getConfiguration().getProperties().containsKey(MulePropetySet.SPRING_PROFILE_ACTIVE)) {
             System.setProperty("spring.profiles.active", getConfiguration().getProperties().get(MulePropetySet.SPRING_PROFILE_ACTIVE));
         }
 
-        if( getConfiguration().getProperties().containsKey(MulePropetySet.HTTP_PORT) ) {
+        if (getConfiguration().getProperties().containsKey(MulePropetySet.HTTP_PORT)) {
             System.setProperty("http.port", getConfiguration().getProperties().get(MulePropetySet.HTTP_PORT));
         }
 
         // configure Log4J
         configureLog4j();
-
-        // avoid Mule calling System.exit(0)
-        setNoExitSecurityManager();
 
         // create a fake Mule home
         setMuleHome();
@@ -119,10 +103,24 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         // enable simple logging
         System.setProperty("mule.simpleLog", "true");
 
-        // start
-        startContainer();
+        SecurityManager previousSecurityManager = System.getSecurityManager();
+        final SecurityManager securityManager = new SecurityManager() {
+            @Override
+            public void checkPermission(final Permission permission) {
+                if (permission.getName() != null && permission.getName().startsWith("exitVM")) {
+                    throw new SecurityException();
+                }
+            }
+        };
+        System.setSecurityManager(securityManager);
 
-        restoreSecurityManager();
+        try {
+            startContainer();
+        } catch (SecurityException e) {
+            // Say hi to your favorite creator of closed source software that includes System.exit() in his code.
+        } finally {
+            System.setSecurityManager(previousSecurityManager);
+        }
 
         started.set(true);
     }
@@ -143,11 +141,6 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         this.muleHome = fakeMuleHome;
     }
 
-    private void setNoExitSecurityManager() {
-        oldSecurityManager = System.getSecurityManager();
-        System.setSecurityManager(new NoExitSecurityManager());
-    }
-
     private void startContainer() throws Exception {
         getServer().getClass().getMethod("start", new Class[]{boolean.class}).invoke(getServer(), false);
     }
@@ -156,27 +149,29 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
     protected final void waitForCompletion(final boolean waitForStarting) throws InterruptedException {
     }
 
-    private void restoreSecurityManager() {
-        System.setSecurityManager(oldSecurityManager);
-    }
-
     @Override
     protected void doStop() throws Exception {
-        try
-        {
-            // avoid Mule calling System.exit(0)
-            setNoExitSecurityManager();
+        SecurityManager previousSecurityManager = System.getSecurityManager();
+        final SecurityManager securityManager = new SecurityManager() {
+            @Override
+            public void checkPermission(final Permission permission) {
+                if (permission.getName() != null && permission.getName().startsWith("exitVM")) {
+                    throw new SecurityException();
+                }
+            }
+        };
+        System.setSecurityManager(securityManager);
 
+        try {
             getServer().getClass().getMethod("shutdown").invoke(getServer());
-
-            restoreSecurityManager();
-
-            new File(muleHome).deleteOnExit();
-        } catch( Exception e ) {
-            // most likely ExitException
+        } catch (SecurityException e) {
+            // Say hi to your favorite creator of closed source software that includes System.exit() in his code.
         } finally {
-            started.set(false);
+            System.setSecurityManager(previousSecurityManager);
         }
+
+        new File(muleHome).deleteOnExit();
+        started.set(false);
     }
 
     /**
@@ -213,35 +208,5 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
         }
 
         return fakeMuleHome;
-    }
-
-    protected static class ExitException extends SecurityException
-    {
-        public final int status;
-        public ExitException(int status)
-        {
-            super("There is no escape!");
-            this.status = status;
-        }
-    }
-
-    private static class NoExitSecurityManager extends SecurityManager
-    {
-        @Override
-        public void checkPermission(Permission perm)
-        {
-            // allow anything.
-        }
-        @Override
-        public void checkPermission(Permission perm, Object context)
-        {
-            // allow anything.
-        }
-        @Override
-        public void checkExit(int status)
-        {
-            super.checkExit(status);
-            throw new ExitException(status);
-        }
     }
 }
