@@ -151,27 +151,33 @@ public class Mule3xEmbeddedLocalContainer extends AbstractEmbeddedLocalContainer
 
     @Override
     protected void doStop() throws Exception {
-        SecurityManager previousSecurityManager = System.getSecurityManager();
-        final SecurityManager securityManager = new SecurityManager() {
-            @Override
-            public void checkPermission(final Permission permission) {
-                if (permission.getName() != null && permission.getName().startsWith("exitVM")) {
-                    throw new SecurityException();
-                }
-            }
-        };
-        System.setSecurityManager(securityManager);
-
         try {
-            getServer().getClass().getMethod("shutdown").invoke(getServer());
-        } catch (SecurityException e) {
-            // Say hi to your favorite creator of closed source software that includes System.exit() in his code.
-        } finally {
-            System.setSecurityManager(previousSecurityManager);
-        }
+            SecurityManager previousSecurityManager = System.getSecurityManager();
+            final SecurityManager securityManager = new SecurityManager() {
+                @Override
+                public void checkPermission(final Permission permission) {
+                    if (permission.getName() != null && permission.getName().startsWith("exitVM")) {
+                        throw new SecurityException();
+                    }
+                }
+            };
+            System.setSecurityManager(securityManager);
 
-        new File(muleHome).deleteOnExit();
-        started.set(false);
+            try {
+                getServer().getClass().getMethod("shutdown").invoke(getServer());
+            } catch (SecurityException e) {
+                // Say hi to your favorite creator of closed source software that includes System.exit() in his code.
+            } finally {
+                System.setSecurityManager(previousSecurityManager);
+            }
+
+            new File(muleHome).deleteOnExit();
+
+        } catch (Exception e) {
+
+        } finally {
+            started.set(false);
+        }
     }
 
     /**
