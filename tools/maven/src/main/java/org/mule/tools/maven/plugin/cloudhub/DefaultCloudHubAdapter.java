@@ -33,4 +33,9 @@ public class DefaultCloudHubAdapter implements CloudHubAdapter {
         connectionDomain.deploy(file,muleVersion,workers,maxWaitTime,properties);
     }
 
+    @Override
+    public void undeploy(long maxWaitTime) {
+        connectionDomain.stop();
+    }
+
 }

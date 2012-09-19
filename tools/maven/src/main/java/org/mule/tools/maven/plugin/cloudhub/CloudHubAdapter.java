@@ -22,4 +22,5 @@ public interface CloudHubAdapter {
 
     void deploy(File file, String muleVersion, int workers, long maxWaitTime, Map<String,String> properties);
 
+    void undeploy(long maxWaitTime);
 }
