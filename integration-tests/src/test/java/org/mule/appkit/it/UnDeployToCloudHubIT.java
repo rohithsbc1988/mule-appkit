@@ -10,6 +10,8 @@
 
 package org.mule.appkit.it;
 
+import org.junit.Ignore;
+
 import java.io.File;
 
 import static junit.framework.Assert.assertFalse;
