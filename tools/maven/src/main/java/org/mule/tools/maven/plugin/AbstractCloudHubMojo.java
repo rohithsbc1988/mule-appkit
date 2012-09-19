@@ -1,14 +1,22 @@
+/*
+ * $Id$
+ * -------------------------------------------------------------------------------------
+ * Copyright (c) MuleSoft, Inc.  All rights reserved.  http://www.mulesoft.com
+ *
+ * The software in this package is published under the terms of the CPAL v1.0
+ * license, a copy of which has been included with this distribution in the
+ * LICENSE.txt file.
+ */
 package org.mule.tools.maven.plugin;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.mulesoft.cloudhub.client.Connection;
-import com.mulesoft.cloudhub.client.DomainConnection;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
+import org.mule.tools.maven.plugin.cloudhub.CloudHubAdapter;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Base class for CloudHub Mojos
@@ -45,11 +53,16 @@ public abstract class AbstractCloudHubMojo extends AbstractMojo {
      */
     private Settings settings;
 
-    protected final Server getServer() throws MojoExecutionException {
+    /**
+     * @component
+     */
+    private CloudHubAdapter cloudHubAdapter;
+
+    protected Server getServer() throws MojoExecutionException {
         return this.settings.getServer(normalize(this.cloudHubUrl));
     }
 
-    protected final String normalize(final String url) throws MojoExecutionException {
+    protected String normalize( String url) throws MojoExecutionException {
         final Pattern pattern = Pattern.compile(AbstractCloudHubMojo.URL_LAYOUT);
         final Matcher matcher = pattern.matcher(url);
         if (!matcher.matches()) {
@@ -58,7 +71,7 @@ public abstract class AbstractCloudHubMojo extends AbstractMojo {
         return matcher.group(1);
     }
 
-    protected final String getUsername() throws MojoExecutionException {
+    protected String getUsername() throws MojoExecutionException {
         if (this.username != null) {
             return this.username;
         }
@@ -70,7 +83,7 @@ public abstract class AbstractCloudHubMojo extends AbstractMojo {
         return server.getUsername();
     }
 
-    protected final String getPassword() throws MojoExecutionException {
+    protected String getPassword() throws MojoExecutionException {
         if (this.password != null) {
             return this.password;
         }
@@ -82,12 +95,9 @@ public abstract class AbstractCloudHubMojo extends AbstractMojo {
         return server.getPassword();
     }
 
-    protected final Connection createConnection() throws MojoExecutionException {
-        return new Connection(this.cloudHubUrl, getUsername(), getPassword());
-    }
-
-    protected final DomainConnection createDomainConnection() throws MojoExecutionException {
-        return createConnection().on(this.domain);
+    protected CloudHubAdapter createDomainConnection() throws MojoExecutionException {
+        cloudHubAdapter.create(this.cloudHubUrl, getUsername(), getPassword(), this.domain);
+        return cloudHubAdapter;
     }
 
 }

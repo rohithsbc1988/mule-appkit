@@ -44,6 +44,10 @@
             </configuration>
         </component>
         <component>
+            <role>org.mule.tools.maven.plugin.cloudhub.CloudHubAdapter</role>
+            <implementation>org.mule.tools.maven.plugin.cloudhub.DefaultCloudHubAdapter</implementation>
+        </component>
+        <component>
             <role>org.codehaus.plexus.archiver.Archiver</role>
             <role-hint>mule</role-hint>
             <implementation>org.mule.tools.maven.plugin.MuleArchiver</implementation>
