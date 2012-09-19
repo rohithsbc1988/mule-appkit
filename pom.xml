@@ -88,6 +88,35 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.8.0</version>
+                <configuration>
+                    <header>LICENSE_HEADER</header>
+                    <excludes>
+                        <exclude>target/**</exclude>
+                        <exclude>.gitignore</exclude>
+                        <exclude>**/*.txt</exclude>
+                        <exclude>**/*.ftl</exclude>
+                        <exclude>**/build-number.txt</exclude>
+                        <exclude>**/*.ftl</exclude>
+                        <exclude>**/assets/**</exclude>
+                        <exclude>**/*.xsd</exclude>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>**/archetype-resources/**</exclude>
+                        <exclude>**/src/main/java/package.html</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -102,35 +131,6 @@
             </activation>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>com.mycila.maven-license-plugin</groupId>
-                        <artifactId>maven-license-plugin</artifactId>
-                        <version>1.8.0</version>
-                        <configuration>
-                            <header>LICENSE_HEADER</header>
-                            <excludes>
-                                <exclude>target/**</exclude>
-                                <exclude>.gitignore</exclude>
-                                <exclude>**/*.txt</exclude>
-                                <exclude>**/*.ftl</exclude>
-                                <exclude>**/build-number.txt</exclude>
-                                <exclude>**/*.ftl</exclude>
-                                <exclude>**/assets/**</exclude>
-                                <exclude>**/*.xsd</exclude>
-                                <exclude>**/*.properties</exclude>
-                                <exclude>**/*.xml</exclude>
-                                <exclude>**/archetype-resources/**</exclude>
-                                <exclude>**/src/main/java/package.html</exclude>
-                            </excludes>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
