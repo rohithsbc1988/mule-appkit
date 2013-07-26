@@ -34,12 +34,12 @@ import static org.mockito.Mockito.when;
 @RunWith(JUnit4.class)
 public class CloudHubDeployMojoTest {
 
-    private CloudHubDeployMojo mojo;
+    private AbstractCloudHubDeployMojo mojo;
 
     @Before
     public void setUp() throws Exception {
 
-        mojo = new CloudHubDeployMojo();
+        mojo = new ArtifactCloudHubDeployMojo();
 
         Connection connection = mock(Connection.class);
 
@@ -51,7 +51,7 @@ public class CloudHubDeployMojoTest {
 
         Artifact artifact = mock(Artifact.class);
 
-        when(artifact.getType()).thenReturn(CloudHubDeployMojo.MULE_TYPE);
+        when(artifact.getType()).thenReturn(ArtifactCloudHubDeployMojo.MULE_TYPE);
 
         File file = mock(File.class);
         when(artifact.getFile()).thenReturn(file);

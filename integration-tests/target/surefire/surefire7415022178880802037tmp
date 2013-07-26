@@ -1,0 +1,6 @@
+#surefire
+#Fri Jul 26 16:55:16 GMT-03:00 2013
+user.dir=/Users/miguel/Workspace/mule-appkit/integration-tests
+localRepository=/Users/miguel/.m2/repository
+skipITs=true
+basedir=/Users/miguel/Workspace/mule-appkit/integration-tests
