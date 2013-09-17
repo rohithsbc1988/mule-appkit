@@ -53,6 +53,14 @@ public abstract class AbstractMuleMojo extends AbstractMojo
      */
     protected MavenProject project;
 
+    /**
+     * Directory containing the mappings resources.
+     *
+     * @parameter expression="${basedir}/mappings"
+     * @optinal
+     */
+    protected File mappingsDirectory;
+    
     protected File getMuleZipFile()
     {
         return new File(this.outputDirectory, this.finalName + ".zip");
