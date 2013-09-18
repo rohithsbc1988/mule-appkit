@@ -24,7 +24,7 @@
 
     <groupId>org.mule.tools.appkit</groupId>
     <artifactId>mule-appkit</artifactId>
-    <version>3.5</version>
+    <version>3.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
