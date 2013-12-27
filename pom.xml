@@ -6,7 +6,7 @@
     <name>Mule AppKit</name>
     <description>
         Maven plug-in for generating Mule applications. Includes support for unit testing, integration testing,
-        deployment and more.
+		deployment and more.
     </description>
     <url>http://github.com/mulesoft/mule-appkit</url>
     <inceptionYear>2010</inceptionYear>
@@ -24,7 +24,7 @@
 
     <groupId>org.mule.tools.appkit</groupId>
     <artifactId>mule-appkit</artifactId>
-    <version>3.7-SNAPSHOT</version>
+    <version>3.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -207,43 +207,44 @@
             <url>http://repository.codehaus.org/</url>
         </repository>
     </repositories>
-    
-    <pluginRepositories>
-        <pluginRepository>
+	
+	<pluginRepositories>
+		<pluginRepository>
             <id>mulesoft-releases</id>
             <name>MuleSoft Release Repository</name>
             <url>http://repository.mulesoft.org/releases/</url>
-        </pluginRepository>
-        <pluginRepository>
+		</pluginRepository>
+		<pluginRepository>
             <id>mulesoft-snapshots</id>
             <name>MuleSoft Snapshot Repository</name>
             <url>http://repository.mulesoft.org/snapshots/</url>
-        </pluginRepository>
-    </pluginRepositories>   
+		</pluginRepository>
+	</pluginRepositories>
 
-    <distributionManagement>
-        <repository>
-            <id>mulesoft-releases</id>
-            <name>MuleSoft Release Repository</name>
-            <url>http://repository-master.mulesoft.org/ci-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>mulesoft-snapshots</id>
-            <name>MuleSoft Snapshot Repository</name>
-            <url>http://repository.mulesoft.org/ci-snapshots/</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>     
-        <!-- These repositories were used until version 3.5 -->   
-<!--         <repository> -->
-<!--             <id>mulesoft-releases</id> -->
-<!--             <name>MuleSoft Release Repository</name> -->
-<!--             <url>http://repository-master.mulesoft.org/releases/</url> -->
-<!--         </repository> -->
-<!--         <snapshotRepository> -->
-<!--             <id>mulesoft-snapshots</id> -->
-<!--             <name>MuleSoft Snapshot Repository</name> -->
-<!--             <url>http://repository.mulesoft.org/snapshots/</url> -->
-<!--             <uniqueVersion>false</uniqueVersion> -->
-<!--         </snapshotRepository> -->
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>mule-ci-releases</id>
+			<name>Mule Release Repository</name>
+			<url>https://repository-master.mulesoft.org/nexus/content/repositories/ci-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>mule-ci-snapshots</id>
+			<name>Mule Snapshot Repository</name>
+			<url>https://repository-master.mulesoft.org/nexus/content/repositories/ci-snapshots/</url>
+			<uniqueVersion>false</uniqueVersion>
+		</snapshotRepository>
+
+		<!-- These repositories were used until version 3.5 -->
+		<!-- <repository> -->
+		<!-- <id>mulesoft-releases</id> -->
+		<!-- <name>MuleSoft Release Repository</name> -->
+		<!-- <url>http://repository-master.mulesoft.org/releases/</url> -->
+		<!-- </repository> -->
+		<!-- <snapshotRepository> -->
+		<!-- <id>mulesoft-snapshots</id> -->
+		<!-- <name>MuleSoft Snapshot Repository</name> -->
+		<!-- <url>http://repository.mulesoft.org/snapshots/</url> -->
+		<!-- <uniqueVersion>false</uniqueVersion> -->
+		<!-- </snapshotRepository> -->
+	</distributionManagement>
 </project>  
