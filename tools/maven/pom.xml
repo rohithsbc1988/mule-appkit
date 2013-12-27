@@ -14,7 +14,7 @@
     <packaging>maven-plugin</packaging>
 
     <properties>
-        <cloudhub.client.version>1.6-SNAPSHOT</cloudhub.client.version>
+        <cloudhub.client.version>1.6</cloudhub.client.version>
     </properties>
 
     <dependencies>
