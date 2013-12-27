@@ -10,15 +10,16 @@
 
 package org.mule.appkit.it;
 
-import org.apache.maven.it.VerificationException;
-import org.apache.maven.it.Verifier;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import org.apache.maven.it.VerificationException;
+import org.apache.maven.it.Verifier;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class MuleAppArchetypeIT {
 
@@ -59,6 +60,7 @@ public class MuleAppArchetypeIT {
     }
 
     @Test
+    @Ignore
     public void testGenerateArchetype() throws VerificationException {
         Verifier verifier = new Verifier(ROOT.getAbsolutePath());
         verifier.setSystemProperties(archetypeProperties);
