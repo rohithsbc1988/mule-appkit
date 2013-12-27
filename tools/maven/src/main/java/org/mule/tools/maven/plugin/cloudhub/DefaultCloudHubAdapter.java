@@ -10,32 +10,57 @@
 
 package org.mule.tools.maven.plugin.cloudhub;
 
-import com.mulesoft.cloudhub.client.Connection;
-import com.mulesoft.cloudhub.client.DomainConnection;
-
 import java.io.File;
 import java.util.Map;
 
+import com.mulesoft.ch.rest.model.Application;
+import com.mulesoft.ch.rest.model.ApplicationStatusChange;
+import com.mulesoft.ch.rest.model.ApplicationStatusChange.DesiredApplicationStatus;
+import com.mulesoft.ch.rest.model.ApplicationUpdateInfo;
+import com.mulesoft.cloudhub.client.CloudHubConnectionImpl;
+import com.mulesoft.cloudhub.client.CloudHubDomainConnectionI;
+
 public class DefaultCloudHubAdapter implements CloudHubAdapter {
 
-    private DomainConnection connectionDomain;
+    private CloudHubDomainConnectionI connectionDomain;
 
     public DefaultCloudHubAdapter() {
     }
 
     @Override
     public void create(String cloudHubUrl, String username, String password, String domain) {
-        connectionDomain = new Connection(cloudHubUrl,username,password).on(domain);
+        connectionDomain = new CloudHubConnectionImpl(cloudHubUrl,username,password,null, false).connectWithDomain(domain);
     }
 
     @Override
     public void deploy(File file, String muleVersion, int workers, long maxWaitTime, Map<String, String> properties) {
-        connectionDomain.deploy(file,muleVersion,workers,maxWaitTime,properties);
+    	
+    	Application app = getApplication(muleVersion, workers, properties);
+    	
+    	if (connectionDomain.isDomainAvailable(connectionDomain.getDomain())){
+    		/* Domain is available, create the application */
+    		connectionDomain.createApplication(app);
+    	} else {
+    		/* Domain is not available, the application already exists. Update the application. */
+    		connectionDomain.updateApplication(new ApplicationUpdateInfo(app));
+    	}
+    	connectionDomain.deployApplication(file, maxWaitTime);
+    	
     }
 
-    @Override
+	@Override
     public void undeploy(long maxWaitTime) {
-        connectionDomain.stop();
+        connectionDomain.updateApplicationStatus(new ApplicationStatusChange(DesiredApplicationStatus.STOP), maxWaitTime);
     }
+	
+    private Application getApplication(String muleVersion, int workers, Map<String, String> properties) {
+		Application app = new Application();
+		
+		app.setMuleVersion(muleVersion);
+		app.setWorkers(workers);
+		app.setProperties(properties);
+		
+		return app;
+	}
 
 }

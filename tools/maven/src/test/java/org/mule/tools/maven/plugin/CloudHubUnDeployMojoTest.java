@@ -10,18 +10,19 @@
 
 package org.mule.tools.maven.plugin;
 
-import com.mulesoft.cloudhub.client.Connection;
-import com.mulesoft.cloudhub.client.DomainConnection;
+import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.junit.Before;
 import org.junit.Test;
 import org.mule.tools.maven.plugin.cloudhub.CloudHubAdapter;
 
-import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.mulesoft.cloudhub.client.CloudHubConnectionI;
+import com.mulesoft.cloudhub.client.CloudHubDomainConnectionI;
 
 public class CloudHubUnDeployMojoTest {
 
@@ -32,11 +33,11 @@ public class CloudHubUnDeployMojoTest {
 
         mojo = new CloudHubUnDeployMojo();
 
-        Connection connection = mock(Connection.class);
+        CloudHubConnectionI connection = mock(CloudHubConnectionI.class);
 
-        DomainConnection domainConnection = mock(DomainConnection.class);
+        CloudHubDomainConnectionI domainConnection = mock(CloudHubDomainConnectionI.class);
 
-        when(connection.on(any(String.class))).thenReturn(domainConnection);
+        when(connection.connectWithDomain(any(String.class))).thenReturn(domainConnection);
 
         String cloudHubUrl = "https://cloudhub.io/";
 

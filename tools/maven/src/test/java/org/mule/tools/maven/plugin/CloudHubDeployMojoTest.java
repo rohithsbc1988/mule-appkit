@@ -10,8 +10,15 @@
 
 package org.mule.tools.maven.plugin;
 
-import com.mulesoft.cloudhub.client.Connection;
-import com.mulesoft.cloudhub.client.DomainConnection;
+import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Properties;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
@@ -22,14 +29,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mule.tools.maven.plugin.cloudhub.CloudHubAdapter;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Properties;
-
-import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.mulesoft.cloudhub.client.CloudHubConnectionI;
+import com.mulesoft.cloudhub.client.CloudHubDomainConnectionI;
 
 @RunWith(JUnit4.class)
 public class CloudHubDeployMojoTest {
@@ -41,11 +42,11 @@ public class CloudHubDeployMojoTest {
 
         mojo = new ArtifactCloudHubDeployMojo();
 
-        Connection connection = mock(Connection.class);
+        CloudHubConnectionI connection = mock(CloudHubConnectionI.class);
 
-        DomainConnection domainConnection = mock(DomainConnection.class);
+        CloudHubDomainConnectionI domainConnection = mock(CloudHubDomainConnectionI.class);
 
-        when(connection.on(any(String.class))).thenReturn(domainConnection);
+        when(connection.connectWithDomain(any(String.class))).thenReturn(domainConnection);
 
         MavenProject project = mock(MavenProject.class);
 
