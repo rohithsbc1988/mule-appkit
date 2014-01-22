@@ -13,6 +13,10 @@
     <artifactId>mule-appkit-cargo-plugin</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <license.path>../../LICENSE_HEADER</license.path>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.codehaus.cargo</groupId>

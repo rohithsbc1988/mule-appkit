@@ -31,6 +31,7 @@
         <mule.version>3.3.0</mule.version>
         <cargo.version>1.2.3</cargo.version>
         <jdk.version>1.6</jdk.version>
+        <license.path>LICENSE_HEADER</license.path>
     </properties>
 
     <modules>
@@ -92,7 +93,7 @@
                 <artifactId>maven-license-plugin</artifactId>
                 <version>1.8.0</version>
                 <configuration>
-                    <header>LICENSE_HEADER</header>
+                    <header>${license.path}</header>
                     <excludes>
                         <exclude>target/**</exclude>
                         <exclude>.gitignore</exclude>

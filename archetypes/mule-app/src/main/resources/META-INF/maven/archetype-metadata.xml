@@ -23,6 +23,18 @@
 		<requiredProperty key="EE">
 			<defaultValue>false</defaultValue>
 		</requiredProperty>
+        <requiredProperty key="domain">
+            <defaultValue>default</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="domainGroupId">
+            <defaultValue>undefined</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="domainArtifactId">
+            <defaultValue>undefined</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="domainVersion">
+            <defaultValue>undefined</defaultValue>
+        </requiredProperty>
 	</requiredProperties>
 	<fileSets>
 		<fileSet filtered="true" packaged="true" encoding="UTF-8">

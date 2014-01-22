@@ -13,6 +13,10 @@
     <artifactId>mule-appkit-integration-tests</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <license.path>../LICENSE_HEADER</license.path>
+    </properties>
+
     <build>
         <plugins>
             <plugin>

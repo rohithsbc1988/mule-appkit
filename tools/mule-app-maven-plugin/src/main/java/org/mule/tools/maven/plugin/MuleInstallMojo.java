@@ -16,9 +16,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
 /**
@@ -27,6 +30,23 @@ import org.codehaus.plexus.util.IOUtil;
  */
 public class MuleInstallMojo extends AbstractMuleMojo
 {
+    /**
+     * If set to <code>true</code> attempt to copy the domain of this Mule application $MULE_HOME/domains
+     *
+     * @parameter alias="installDomain" expression="${installDomain}" default-value="false"
+     * @required
+     */
+    protected boolean installDomain;
+
+    /**
+     * If the mule app belongs to a domain you can set this value with the domain dependency information groupId:artifactId:version so during
+     * install phase the mule domain maven plugin can deploy the domain before deploying the application.
+     *
+     * @parameter alias="domainDependency" expression="${domainDependency}" default-value="empty"
+     * @required
+     */
+    protected String domainDependency;
+
     /**
      * If set to <code>true</code> attempt to copy the Mule application zip to $MULE_HOME/apps
      *
@@ -42,6 +62,45 @@ public class MuleInstallMojo extends AbstractMuleMojo
             File muleHome = determineMuleHome();
             if (muleHome != null)
             {
+                if (installDomain)
+                {
+                    if (domainDependency == null || domainDependency.trim().equals("") || domainDependency.equals("empty"))
+                    {
+                        throw new MojoExecutionException("You must configure the domainDependency configuration attribute and specify the domain dependency in order to install the domain in the mule server");
+                    }
+                    String[] split = domainDependency.split(":");
+                    if (split.length != 3)
+                    {
+                        throw new MojoExecutionException("domainDependency attribute does not declare groupId or artifactId or version");
+                    }
+                    String domainGroupId = split[0];
+                    String domainArtifactId = split[1];
+                    String domainVersion = split[2];
+
+                    Set dependencyArtifacts = project.getDependencyArtifacts();
+                    boolean domainFound = false;
+                    for (Object dependencyArtifact : dependencyArtifacts)
+                    {
+                        Artifact artifact = (Artifact) dependencyArtifact;
+                        if (artifact.getGroupId().equals(domainGroupId) && artifact.getArtifactId().equals(domainArtifactId) && artifact.getVersion().equals(domainVersion))
+                        {
+                            domainFound = true;
+                            try
+                            {
+                                FileUtils.copyFile(artifact.getFile(), new File(muleHome, "domains" + File.separator + artifact.getFile().getName()));
+                            }
+                            catch (IOException e)
+                            {
+                                throw new MojoExecutionException(e.getMessage(), e);
+                            }
+                            break;
+                        }
+                    }
+                    if (!domainFound)
+                    {
+                        throw new MojoExecutionException("installDomain was configured but domain dependency is not available in the project. Did you forgot to add the domain as a dependency with type zip?");
+                    }
+                }
                 copyMuleZipToMuleHome(muleHome);
             }
             else

@@ -51,7 +51,7 @@
 										<versionRange>[3.3,)</versionRange>
 										<goals>
 											<goal>attach-test-resources</goal>
-											<goal>filter-resources		</goal>
+											<goal>filter-resources</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
@@ -74,6 +74,11 @@
 					<copyToAppsDirectory>true</copyToAppsDirectory>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.mule.tools</groupId>
+                <artifactId>studio-maven-plugin</artifactId>
+                <version>${mule.version}</version>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -225,6 +230,15 @@
 
 	<!-- Mule Dependencies -->
 	<dependencies>
+#if(${domain} != 'default')
+        <dependency>
+            <groupId>${domainGroupId}</groupId>
+            <artifactId>${domainArtifactId}</artifactId>
+            <version>${domainVersion}</version>
+            <scope>provided</scope>
+            <type>zip</type>
+        </dependency>
+#end
 		<dependency>
 			<groupId>org.mule</groupId>
 			<artifactId>mule-core</artifactId>
