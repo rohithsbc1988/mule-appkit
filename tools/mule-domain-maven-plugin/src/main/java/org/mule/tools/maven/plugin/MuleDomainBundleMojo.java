@@ -4,12 +4,14 @@ import static java.lang.String.format;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
 import org.codehaus.plexus.archiver.zip.ZipUnArchiver;
+import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Build a Mule domain bundle archive.
@@ -67,6 +69,17 @@ public class MuleDomainBundleMojo extends MuleDomainMojo
         File domainZipFile = filesInTargetFolder[0];
         ZipUnArchiver domainUnzipArchiver = new ZipUnArchiver();
         File domainBundleTempDir = new File(project.getBasedir(), "target" + File.separator + "domain-bundle-temp");
+        if (domainBundleTempDir.exists())
+        {
+            try
+            {
+                FileUtils.deleteDirectory(domainBundleTempDir);
+            }
+            catch (IOException e)
+            {
+                throw new MojoExecutionException("Could not delete directory " + domainBundleTempDir.getAbsolutePath());
+            }
+        }
         if (!domainBundleTempDir.mkdir())
         {
             throw new MojoExecutionException(format("Could not create folder %s", domainBundleTempDir));

@@ -29,6 +29,7 @@
 
     <build>
         <plugins>
+            <!-- required to generate a studio project from a maven project using mvn studio:studio -->
             <plugin>
                 <groupId>org.mule.tools</groupId>
                 <artifactId>studio-maven-plugin</artifactId>

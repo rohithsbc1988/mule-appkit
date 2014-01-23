@@ -61,7 +61,7 @@ public abstract class AbstractMuleMojo extends AbstractMojo
      */
     protected File mappingsDirectory;
     
-    protected File getMuleZipFile()
+    protected File getMuleAppZipFile()
     {
         return new File(this.outputDirectory, this.finalName + ".zip");
     }

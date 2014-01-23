@@ -21,6 +21,11 @@
 		<jdkName>JavaSE-1.6</jdkName>
 		<jdk.version>1.6</jdk.version>
 		<junit.version>4.9</junit.version>
+#if(${domainGroupId})
+        <domainGroupId>${domainGroupId}</domainGroupId>
+        <domainArtifactId>${domainArtifactId}</domainArtifactId>
+        <domainVersion>${domainVersion}</domainVersion>
+#end
 	</properties>
 
 	<build>
@@ -72,6 +77,12 @@
 				<extensions>true</extensions>
 				<configuration>
 					<copyToAppsDirectory>true</copyToAppsDirectory>
+#if(${domainGroupId} != 'empty')
+                    <!-- unncomment to deploy domain before the applications during install phase
+                    <installDomain>true</installDomain>
+                    <domainDependency>${symbol_dollar}{domainGroupId}:${symbol_dollar}{domainArtifactId}:${symbol_dollar}{domainVersion}</domainDependency>
+                    -->
+#end
 				</configuration>
 			</plugin>
             <plugin>
@@ -230,7 +241,7 @@
 
 	<!-- Mule Dependencies -->
 	<dependencies>
-#if(${domain} != 'default')
+#if(${domainGroupId} != 'empty')
         <dependency>
             <groupId>${domainGroupId}</groupId>
             <artifactId>${domainArtifactId}</artifactId>

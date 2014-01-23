@@ -23,17 +23,14 @@
 		<requiredProperty key="EE">
 			<defaultValue>false</defaultValue>
 		</requiredProperty>
-        <requiredProperty key="domain">
-            <defaultValue>default</defaultValue>
-        </requiredProperty>
         <requiredProperty key="domainGroupId">
-            <defaultValue>undefined</defaultValue>
+            <defaultValue>empty</defaultValue>
         </requiredProperty>
         <requiredProperty key="domainArtifactId">
-            <defaultValue>undefined</defaultValue>
+            <defaultValue>empty</defaultValue>
         </requiredProperty>
         <requiredProperty key="domainVersion">
-            <defaultValue>undefined</defaultValue>
+            <defaultValue>empty</defaultValue>
         </requiredProperty>
 	</requiredProperties>
 	<fileSets>

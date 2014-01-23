@@ -37,34 +37,9 @@ public class MuleDomainMojo extends AbstractMuleMojo
 {
 
     /**
-     * If set to <code>true</code> attempt to copy the Mule application zip to $MULE_HOME/apps
-     *
-     * @parameter alias="bundleApps" expression="${bundleApps}" default-value="false"
-     * @required
-     */
-    protected boolean bundleApps;
-
-    /**
      * @component
      */
     private MavenProjectHelper projectHelper;
-
-    /**
-     * Directory containing the classes.
-     *
-     * @parameter expression="${project.build.outputDirectory}"
-     * @required
-     */
-    private File classesDirectory;
-
-    /**
-     * Whether a JAR file will be created for the classes in the app. Using this optional
-     * configuration parameter will make the generated classes to be archived into a jar file
-     * and the classes directory will then be excluded from the app.
-     *
-     * @parameter expression="${archiveClasses}" default-value="false"
-     */
-    private boolean archiveClasses;
 
     /**
      * List of exclusion elements (having groupId and artifactId children) to exclude from the
@@ -94,12 +69,6 @@ public class MuleDomainMojo extends AbstractMuleMojo
 
     /**
      * @parameter default-value="false"
-     * @since 1.7
-     */
-    private boolean filterAppDirectory;
-
-    /**
-     * @parameter default-value="false"
      * @since 1.8
      */
     private boolean prependGroupId;
@@ -116,9 +85,8 @@ public class MuleDomainMojo extends AbstractMuleMojo
             throw new MojoExecutionException("Exception creating the Mule App", e);
         }
 
-        this.project.setFile(domain);
-        this.project.getArtifact().setFile(domain);
         this.projectHelper.attachArtifact(this.project, "zip", domain);
+        this.project.getArtifact().setFile(domain);
     }
 
     protected Logger createLogger()
@@ -128,67 +96,77 @@ public class MuleDomainMojo extends AbstractMuleMojo
         {
             public void debug(String s)
             {
+                getLog().debug(s);
             }
 
             public void debug(String s, Throwable throwable)
             {
+                getLog().debug(s, throwable);
             }
 
             public boolean isDebugEnabled()
             {
-                return false;
+                return getLog().isDebugEnabled();
             }
 
             public void info(String s)
             {
+                getLog().info(s);
             }
 
             public void info(String s, Throwable throwable)
             {
+                getLog().info(s, throwable);
             }
 
             public boolean isInfoEnabled()
             {
-                return false;
+                return getLog().isInfoEnabled();
             }
 
             public void warn(String s)
             {
+                getLog().warn(s);
             }
 
             public void warn(String s, Throwable throwable)
             {
+                getLog().warn(s, throwable);
             }
 
             public boolean isWarnEnabled()
             {
-                return false;
+                return getLog().isWarnEnabled();
             }
 
             public void error(String s)
             {
+                getLog().error(s);
             }
 
             public void error(String s, Throwable throwable)
             {
+                getLog().error(s, throwable);
             }
 
             public boolean isErrorEnabled()
             {
-                return false;
+                return getLog().isErrorEnabled();
             }
 
             public void fatalError(String s)
             {
+                getLog().error(s);
             }
 
             public void fatalError(String s, Throwable throwable)
             {
+                getLog().error(s, throwable);
             }
 
             public boolean isFatalErrorEnabled()
             {
-                return false;
+                return getLog().isErrorEnabled();
             }
 
             public Logger getChildLogger(String s)
@@ -298,83 +276,6 @@ public class MuleDomainMojo extends AbstractMuleMojo
 
             getLog().error(message);
             throw new MojoExecutionException(message);
-        }
-    }
-
-    private void addAppDirectory(MuleArchiver archiver) throws ArchiverException
-    {
-        if (filterAppDirectory)
-        {
-            archiver.addResources(getFilteredAppDirectory());
-        }
-        else
-        {
-            archiver.addResources(appDirectory);
-        }
-    }
-
-    private void addCompiledClasses(MuleArchiver archiver) throws ArchiverException, MojoExecutionException
-    {
-        if (this.archiveClasses == false)
-        {
-            addClassesFolder(archiver);
-        }
-        else
-        {
-            addArchivedClasses(archiver);
-        }
-    }
-
-    private void addClassesFolder(MuleArchiver archiver) throws ArchiverException
-    {
-        if (this.classesDirectory.exists())
-        {
-            getLog().info("Copying classes directly");
-            archiver.addClasses(this.classesDirectory, null, null);
-        }
-        else
-        {
-            getLog().info(this.classesDirectory + " does not exist, skipping");
-        }
-    }
-
-    private void addMappingsDirectory(MuleArchiver archiver) throws ArchiverException
-    {
-        if (this.mappingsDirectory.exists())
-        {
-            getLog().info("Copying mappings");
-            archiver.addResources(this.mappingsDirectory);
-        }
-        else
-        {
-            getLog().info(this.mappingsDirectory + " does not exist, skipping");
-        }
-    }
-
-    private void addArchivedClasses(MuleArchiver archiver) throws ArchiverException, MojoExecutionException
-    {
-        if (this.classesDirectory.exists() == false)
-        {
-            getLog().info(this.classesDirectory + " does not exist, skipping");
-            return;
-        }
-
-        getLog().info("Copying classes as a jar");
-
-        final JarArchiver jarArchiver = new JarArchiver();
-        jarArchiver.addDirectory(this.classesDirectory, null, null);
-        final File jar = new File(this.outputDirectory, this.finalName + ".jar");
-        jarArchiver.setDestFile(jar);
-        try
-        {
-            jarArchiver.createArchive();
-            archiver.addLib(jar);
-        }
-        catch (IOException e)
-        {
-            final String message = "Cannot create project jar";
-            getLog().error(message, e);
-            throw new MojoExecutionException(message, e);
         }
     }
 

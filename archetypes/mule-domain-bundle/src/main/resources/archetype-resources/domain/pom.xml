@@ -16,7 +16,7 @@
         <plugins>
             <plugin>
                 <groupId>org.mule.tools.appkit</groupId>
-                <artifactId>maven-mule-domain-plugin</artifactId>
+                <artifactId>mule-domain-maven-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <extensions>true</extensions>
             </plugin>

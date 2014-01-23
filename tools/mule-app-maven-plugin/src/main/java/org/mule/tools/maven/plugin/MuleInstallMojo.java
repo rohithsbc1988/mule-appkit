@@ -87,7 +87,7 @@ public class MuleInstallMojo extends AbstractMuleMojo
                             domainFound = true;
                             try
                             {
-                                FileUtils.copyFile(artifact.getFile(), new File(muleHome, "domains" + File.separator + artifact.getFile().getName()));
+                                copyZipFileToDestDirUsingTempFile(artifact.getFile(),  new File(muleHome, "domains"));
                             }
                             catch (IOException e)
                             {
@@ -101,7 +101,7 @@ public class MuleInstallMojo extends AbstractMuleMojo
                         throw new MojoExecutionException("installDomain was configured but domain dependency is not available in the project. Did you forgot to add the domain as a dependency with type zip?");
                     }
                 }
-                copyMuleZipToMuleHome(muleHome);
+                copyMuleAppZipToMuleHome(muleHome);
             }
             else
             {
@@ -149,12 +149,11 @@ public class MuleInstallMojo extends AbstractMuleMojo
         return muleHome;
     }
 
-    private void copyMuleZipToMuleHome(File muleHome) throws MojoExecutionException
+    private void copyMuleAppZipToMuleHome(File muleHome) throws MojoExecutionException
     {
         try
         {
-            copyMuleZipFileToTempFileInAppsDirectory(muleHome);
-            renameMuleZipFileToFinalName(muleHome);
+            copyZipFileToDestDirUsingTempFile(getMuleAppZipFile(), muleAppsDirectory(muleHome));
         }
         catch (IOException iox)
         {
@@ -162,54 +161,38 @@ public class MuleInstallMojo extends AbstractMuleMojo
         }
     }
 
-    private void copyMuleZipFileToTempFileInAppsDirectory(File muleHome) throws IOException
+    private void copyZipFileToDestDirUsingTempFile(File zipFile, File dest) throws IOException, MojoExecutionException
     {
+        if (!dest.isDirectory())
+        {
+            throw new IllegalArgumentException("destination must be a directory");
+        }
         InputStream muleZipInput = null;
         OutputStream tempOutput = null;
         try
         {
-            File zipFile = getMuleZipFile();
             muleZipInput = new FileInputStream(zipFile);
 
-            File tempFile = tempFileInAppsDirectory(muleHome);
+            File tempFile = new File(dest, zipFile.getName().replace(".zip", ".temp"));
             tempOutput = new FileOutputStream(tempFile);
 
             IOUtil.copy(muleZipInput, tempOutput);
 
-            String message = String.format("Copying %1s to %2s", zipFile.getAbsolutePath(),
-                tempFile.getAbsolutePath());
-            getLog().info(message);
+            getLog().info(String.format("Copying %1s to %2s", zipFile.getAbsolutePath(),
+                                        tempFile.getAbsolutePath()));
+
+            File finalFile = new File(dest, zipFile.getName());
+            if (tempFile.renameTo(finalFile) == false)
+            {
+                throw new MojoExecutionException(String.format("Could not rename %1s to %2s",
+                                                               tempFile.getAbsolutePath(), finalFile.getAbsolutePath()));
+            }
         }
         finally
         {
             IOUtil.close(muleZipInput);
             IOUtil.close(tempOutput);
         }
-    }
-
-    private void renameMuleZipFileToFinalName(File muleHome) throws MojoExecutionException
-    {
-        File sourceFile = tempFileInAppsDirectory(muleHome);
-
-        File appsDirectory = muleAppsDirectory(muleHome);
-        File targetFile = new File(appsDirectory, finalName + ".zip");
-
-        if (sourceFile.renameTo(targetFile) == false)
-        {
-            String message = String.format("Could not rename %1s to %2s",
-                sourceFile.getAbsolutePath(), targetFile.getAbsolutePath());
-            throw new MojoExecutionException(message);
-        }
-
-        String message = String.format("Renaming %1s to %2s", sourceFile.getAbsolutePath(),
-            targetFile.getAbsolutePath());
-        getLog().info(message);
-    }
-
-    private File tempFileInAppsDirectory(File muleHome)
-    {
-        File appsDirectory = muleAppsDirectory(muleHome);
-        return new File(appsDirectory, finalName + ".temp");
     }
 
     private File muleAppsDirectory(File muleHome)

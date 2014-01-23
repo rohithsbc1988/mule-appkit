@@ -93,7 +93,7 @@ public class MuleMojo extends AbstractMuleMojo
 
     public void execute() throws MojoExecutionException, MojoFailureException
     {
-        File app = getMuleZipFile();
+        File app = getMuleAppZipFile();
         try
         {
             createMuleApp(app);
