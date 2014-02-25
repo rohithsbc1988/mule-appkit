@@ -12,7 +12,14 @@ Creating a mule application using the mule archetype project is extremely easy. 
 	-DarchetypeVersion=3.3-SNAPSHOT -DgroupId=org.mule -DartifactId=mule-test-archetype -Dversion=1.0-SNAPSHOT \
 	-DmuleVersion=3.2.1 -Dpackage=org.mule -Dtransports=file,http,jdbc,jms,vm -Dmodules=client,cxf,management,scripting,sxc,xml \
 	-DstudioNature=false 
-						
+	
+In case you want your application to belong to a mule domain then you can add the domain specification parameters:
+
+     mvn archetype:generate -DarchetypeGroupId=org.mule.tools.appkit -DarchetypeArtifactId=mule-appkit-archetype-mule-app \
+	-DarchetypeVersion=3.3-SNAPSHOT -DgroupId=org.mule -DartifactId=mule-test-archetype -Dversion=1.0-SNAPSHOT \
+	-DmuleVersion=3.2.1 -Dpackage=org.mule -Dtransports=file,http,jdbc,jms,vm -Dmodules=client,cxf,management,scripting,sxc,xml \
+	-DstudioNature=false -DdomainGroupId=org.mule.domain -DdomainArtifactId=my-domain -DdomainVersion=1.0-SNAPSHOT
+
 Archetype Parameters:
 
 |parameter|description|default|
