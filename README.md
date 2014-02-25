@@ -49,7 +49,7 @@ To create a domain execute:
 
      mvn archetype:generate -DarchetypeGroupId=org.mule.tools.appkit -DarchetypeArtifactId=mule-appkit-archetype-mule-domain \
 	-DarchetypeVersion=3.7-SNAPSHOT -DgroupId=org.mule.test -DartifactId=mule-test-domain -Dversion=1.0-SNAPSHOT \
-	-Dpackage=org.mule.test
+	-Dpackage=org.mule.test -DEE=true
 
 Archetype Parameters:
 
@@ -61,6 +61,8 @@ Archetype Parameters:
 |groupId|The group Id of the domain you are creating. A good value would be the reserve name of your company domain name, like: com.mulesoft.app or org.mule.app||
 |artifactId|The artifact Id of the domain you are creating. ||
 |version|The version of your application. Usually 1.0-SNAPSHOT. Your domain name, when depoyed to mule, will be artifactId-version|1.0-SNAPSHOT|
+|EE|A flag to import the EE counterpart of the domain namespace. |false |
+
 
 Create a Complete Mule Domain Project
 ----------------------------------------
@@ -72,7 +74,7 @@ To create a maven project with the domain and all the applications that will be 
 
      mvn archetype:generate -DarchetypeGroupId=org.mule.tools.appkit -DarchetypeArtifactId=mule-appkit-archetype-mule-domain-bundle \
 	-DarchetypeVersion=3.7-SNAPSHOT -DgroupId=org.mule.test -DartifactId=mule-api -Dversion=1.0-SNAPSHOT \
-	-Dpackage=org.mule.test
+	-Dpackage=org.mule.test -DEE=false
 
 This command will create a maven multi-module project with the following modules:
  - domain: This project is exactly as any project created with mule domain archetype. The artifact id for this project is ${artifactId}-domain. In this case would be mule-api-domain.
@@ -88,3 +90,5 @@ This command will create a maven multi-module project with the following modules
  |artifactId|The artifact Id of the domain bundle you are creating. Try to not include the domain word in it. ||
  |version|The version of your domain bundle. Usually 1.0-SNAPSHOT. Your domain name, when deployed to mule, will be artifactId-version|1.0-SNAPSHOT|
  |package|Required by maven archetype but not used. ||
+ |EE|A flag to import the EE counterpart of the domain namespace. |false |
+

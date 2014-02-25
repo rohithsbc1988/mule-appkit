@@ -76,7 +76,7 @@
 				<version>${symbol_dollar}{mule.appkit.version}</version>
 				<extensions>true</extensions>
 				<configuration>
-					<copyToAppsDirectory>true</copyToAppsDirectory>
+                    <copyToAppsDirectory>true</copyToAppsDirectory>
 #if(${domainGroupId} != 'empty')
                     <!-- unncomment to deploy domain before the applications during install phase
                     <installDomain>true</installDomain>
@@ -243,9 +243,9 @@
 	<dependencies>
 #if(${domainGroupId} != 'empty')
         <dependency>
-            <groupId>${domainGroupId}</groupId>
-            <artifactId>${domainArtifactId}</artifactId>
-            <version>${domainVersion}</version>
+            <groupId>${symbol_dollar}{domainGroupId}</groupId>
+            <artifactId>${symbol_dollar}{domainArtifactId}</artifactId>
+            <version>${symbol_dollar}{domainVersion}</version>
             <scope>provided</scope>
             <type>zip</type>
         </dependency>
