@@ -5,7 +5,7 @@
 *.iml
 *.ipr
 *.iws
-/target 
+/target
 .DS_Store*
 .idea
 .project
