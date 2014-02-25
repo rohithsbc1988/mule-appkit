@@ -223,17 +223,17 @@
 	</pluginRepositories>	
 
     <distributionManagement>
-                <repository>
-                        <id>mule-ci-releases</id>
-                        <name>Mule Release Repository</name>
-                        <url>https://repository-master.mulesoft.org/nexus/content/repositories/ci-releases/</url>
-                </repository>
-                <snapshotRepository>
-                        <id>mule-ci-snapshots</id>
-                        <name>Mule Snapshot Repository</name>
-                        <url>https://repository-master.mulesoft.org/nexus/content/repositories/ci-snapshots/</url>
-                        <uniqueVersion>false</uniqueVersion>
-                </snapshotRepository>
+            <repository>
+                    <id>mule-ci-releases</id>
+                    <name>Mule Release Repository</name>
+                    <url>https://repository-master.mulesoft.org/nexus/content/repositories/releases/</url>
+            </repository>
+            <snapshotRepository>
+                    <id>mule-ci-snapshots</id>
+                    <name>Mule Snapshot Repository</name>
+                    <url>https://repository-master.mulesoft.org/nexus/content/repositories/snapshots/</url>
+                    <uniqueVersion>false</uniqueVersion>
+            </snapshotRepository>
 
         <!-- These repositories were used until version 3.5 -->   
 <!--         <repository> -->
