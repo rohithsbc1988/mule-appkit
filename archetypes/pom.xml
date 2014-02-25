@@ -13,7 +13,13 @@
     <artifactId>mule-appkit-archetypes</artifactId>
     <packaging>pom</packaging>
 
+    <properties>
+        <license.path>../LICENSE_HEADER</license.path>
+    </properties>
+
     <modules>
         <module>mule-app</module>
+        <module>mule-domain</module>
+        <module>mule-domain-bundle</module>
     </modules>
 </project>

@@ -21,6 +21,11 @@
 		<jdkName>JavaSE-1.6</jdkName>
 		<jdk.version>1.6</jdk.version>
 		<junit.version>4.9</junit.version>
+#if(${domainGroupId})
+        <domainGroupId>${domainGroupId}</domainGroupId>
+        <domainArtifactId>${domainArtifactId}</domainArtifactId>
+        <domainVersion>${domainVersion}</domainVersion>
+#end
 	</properties>
 
 	<build>
@@ -51,7 +56,7 @@
 										<versionRange>[3.3,)</versionRange>
 										<goals>
 											<goal>attach-test-resources</goal>
-											<goal>filter-resources		</goal>
+											<goal>filter-resources</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
@@ -71,9 +76,20 @@
 				<version>${symbol_dollar}{mule.appkit.version}</version>
 				<extensions>true</extensions>
 				<configuration>
-					<copyToAppsDirectory>true</copyToAppsDirectory>
+                    <copyToAppsDirectory>true</copyToAppsDirectory>
+#if(${domainGroupId} != 'empty')
+                    <!-- unncomment to deploy domain before the applications during install phase
+                    <installDomain>true</installDomain>
+                    <domainDependency>${symbol_dollar}{domainGroupId}:${symbol_dollar}{domainArtifactId}:${symbol_dollar}{domainVersion}</domainDependency>
+                    -->
+#end
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.mule.tools</groupId>
+                <artifactId>studio-maven-plugin</artifactId>
+                <version>${mule.version}</version>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -225,6 +241,15 @@
 
 	<!-- Mule Dependencies -->
 	<dependencies>
+#if(${domainGroupId} != 'empty')
+        <dependency>
+            <groupId>${symbol_dollar}{domainGroupId}</groupId>
+            <artifactId>${symbol_dollar}{domainArtifactId}</artifactId>
+            <version>${symbol_dollar}{domainVersion}</version>
+            <scope>provided</scope>
+            <type>zip</type>
+        </dependency>
+#end
 		<dependency>
 			<groupId>org.mule</groupId>
 			<artifactId>mule-core</artifactId>

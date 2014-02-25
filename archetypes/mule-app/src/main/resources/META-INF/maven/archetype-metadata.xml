@@ -23,6 +23,15 @@
 		<requiredProperty key="EE">
 			<defaultValue>false</defaultValue>
 		</requiredProperty>
+        <requiredProperty key="domainGroupId">
+            <defaultValue>empty</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="domainArtifactId">
+            <defaultValue>empty</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="domainVersion">
+            <defaultValue>empty</defaultValue>
+        </requiredProperty>
 	</requiredProperties>
 	<fileSets>
 		<fileSet filtered="true" packaged="true" encoding="UTF-8">
@@ -36,6 +45,7 @@
 			<directory>src/main/app</directory>
 			<includes>
 				<include>**/*.xml</include>
+                <include>**/*.properties</include>
 			</includes>
 		</fileSet>
 		<fileSet filtered="true" packaged="true" encoding="UTF-8">
