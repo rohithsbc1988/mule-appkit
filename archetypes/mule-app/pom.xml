@@ -64,7 +64,6 @@
                     </replacements>
                 </configuration>
             </plugin>
-
         </plugins>
 
     </build>
